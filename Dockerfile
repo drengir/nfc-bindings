@@ -13,3 +13,18 @@ RUN \
   tar xvfz libnfc-1.7.1.tar.gz && \
   sh -c "echo /usr/local/lib > /etc/ld.so.conf.d/usr-local-lib.conf" && \
   ldconfig
+
+WORKDIR /usr/src/app/libnfc-libnfc-1.7.1
+RUN \
+  autoreconf -vis && \
+  ./configure --with-drivers=pn532_i2c --prefix=/usr --sysconfdir=/etc && \
+  make clean && \
+  make && \
+  make install && \
+  mkdir /etc/nfc && \
+  echo "device.name = 'PN532'\ndevice.connstring = pn532_i2c:/dev/i2c-1" >> /etc/nfc/libnfc.conf
+ 
+WORKDIR /usr/src/app/nfc-bindings-master
+RUN \
+  cmake -DCMAKE_INSTALL_PREFIX=~/.local . && \
+  make install
